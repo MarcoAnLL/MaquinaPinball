@@ -51,6 +51,11 @@ GLboolean animacionLambLlorra = false;
 
 //*/*/*******************************************************************************************/
 
+//Encendido y apagado de luces
+GLboolean luz1 = true;
+GLboolean luz2 = true;
+GLboolean luz3 = true;
+
 //Movimiento de palanca
 GLboolean banderaPalanca = false;
 int movimientoPalanca = 0;
@@ -118,6 +123,7 @@ PointLight pointLights[MAX_POINT_LIGHTS];
 SpotLight spotLights[MAX_SPOT_LIGHTS];
 SpotLight spotLights2[MAX_SPOT_LIGHTS];
 SpotLight spotLights3[MAX_SPOT_LIGHTS];
+SpotLight spotLights4[MAX_SPOT_LIGHTS];
 
 // Vertex Shader
 static const char* vShader = "shaders/shader_light.vert";
@@ -158,8 +164,74 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 }
 
 
+void crearPiramide() {
+	unsigned int indices[] = {
+		0, 2, 4,
+		1, 2, 4,
+		1, 3, 4,
+		0, 3, 4,
+		0, 3, 1,
+		0, 2, 1
+	};
+
+	GLfloat piramide_vertices[] = {
+		-1.0f, 0.0f,  0.0f,			0.5f, 1.0f,		0.0f, 0.0f, 0.0f,//A
+		0.0f, -1.0f,  0.0f,			0.5f, 1.0f,		0.0f, 0.0f, 0.0f,//B
+		0.0f,  0.0f,  0.0f,			0.5f, 1.0f,		0.0f, 0.0f, 0.0f,//C
+		-1.0f,  -1.0f,  0.0f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f,//D
+		-0.5f, -0.5f, 1.0f,			0.5f, 1.0f,		0.0f, 0.0f, 0.0f//E
+	};
+
+	Mesh* piramide = new Mesh();
+	piramide->CreateMesh(piramide_vertices, indices, 40, 18);
+	meshList.push_back(piramide);
+}
+
+void CrearCubo()
+{
+	unsigned int cubo_indices[] = {
+		// front
+		0, 1, 2,
+		2, 3, 0,
+		// right
+		1, 5, 6,
+		6, 2, 1,
+		// back
+		7, 6, 5,
+		5, 4, 7,
+		// left
+		4, 0, 3,
+		3, 7, 4,
+		// bottom
+		4, 5, 1,
+		1, 0, 4,
+		// top
+		3, 2, 6,
+		6, 7, 3
+	};
+
+	GLfloat cubo_vertices[] = {
+		// front
+		-0.5f, -0.5f,  0.5f,	0.5f, 1.0f,		0.0f, 0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	0.5f, 1.0f,		0.0f, 0.0f, 0.0f,
+		// back
+		-0.5f, -0.5f, -0.5f,	0.5f, 1.0f,		0.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	0.5f, 1.0f,		0.0f, 0.0f, 0.0f
+	};
+	Mesh* cubo = new Mesh();
+	cubo->CreateMesh(cubo_vertices, cubo_indices, 64, 36);
+	meshList.push_back(cubo);
+}
+
+
 void CreateObjects()
 {
+	
+
 	unsigned int indices[] = {
 		0, 3, 1,
 		1, 3, 2,
@@ -297,7 +369,7 @@ bool animacion = false;
 //NEW// Keyframes
 //variables de animacion 
 float posXavion = 30.0, posYavion = 15.0, posZavion = -2.0;
-float	movAvion_x = 0.0f, movAvion_y = 0.0f, movAvion_z = 0.0, movGiro;
+float	movAvion_x = 0.0f, movAvion_y = 0.0f, movAvion_z = 0.0;
 float giroAvion = 0;
 
 //Maximo de cuadros que se van a guardar
@@ -305,7 +377,7 @@ float giroAvion = 0;
 
 //Interpolar 90 veces ?
 int i_max_steps = 90;
-int i_curr_steps = 4;
+int i_curr_steps = 15;
 
 
 typedef struct _frame
@@ -324,7 +396,7 @@ typedef struct _frame
 
 FRAME KeyFrame[MAX_FRAMES];
 //int FrameIndex = 7;			//introducir datos
-int FrameIndex = 0;
+int FrameIndex = 15; 
 bool play = false; 
 int playIndex = 0;
 
@@ -417,28 +489,30 @@ void animate(void)
 
 
 GLboolean rotaPaleta1 = false;
-GLboolean linterna = false;
-
 GLboolean rotaPaleta2 = false;
 GLboolean rotaPaleta3 = false;
 float contadorPaleta1 = 0.0f;
 float contadorPaleta2 = 0.0f;
 float contadorPaleta3 = 0.0f;
-float arreglo_luces = 0.0f;
 
 //Variables animacion lamb
 GLboolean incrementaLambBrazos = true , incrementaLambPiernas = true;
 float contadorLamb = 0.0f;
 int anguloLambBrazos = 0, anguloLambPiernas = 0;
 
+/////*Contador de ciclos*/
+int contadorCiclos = 0;
+
 
 int main()
 {
 	mainWindow = Window(1366, 768); // 1280, 1024 or 1024, 768
 	mainWindow.Initialise();
-
+	
 	CreateObjects();
 	CreateShaders();
+	crearPiramide();
+	CrearCubo();
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
 
@@ -500,12 +574,12 @@ int main()
 
 	std::vector<std::string> skyboxFaces;
 	
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-	skyboxFaces.push_back("Textures/Skybox/techo.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisaje.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_rt.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_lf.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_dn.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_up.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_bk.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_ft.tga");
 
 	skybox = Skybox(skyboxFaces);
 
@@ -522,27 +596,11 @@ int main()
 	//Declaración de primer luz puntual
 
 	unsigned int spotLightCount = 0;
-	//linterna
-	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
-		0.0f, 2.0f,
-		0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		5.0f);
-	spotLightCount++;
-
-	/*
-	//luz AMBIENTE
-	pointLights[1] = PointLight(1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f,
-		-60.0f, 25.0f, 243.0f,
-		0.8f, 0.01f, 0.0000000001f);
-	pointLightCount++;
-	*/
 	
-	//espada
 	
-	spotLights[1] = SpotLight(0.0f, 1.0f, 0.0f,
+	//////////////////////////////////////////Luces proyecto
+	//Luz Verde
+	spotLights[2] = SpotLight(0.0f, 1.0f, 0.0f,
 		1.0f, 2.0f,
 		-20.0f, 25.0f, 210.0f, //25
 		0.0f, 1.0f, 1.000f,
@@ -550,7 +608,8 @@ int main()
 		55.0f);
 	spotLightCount++;
 
-	spotLights[2] = SpotLight(1.0f, 0.0f, 0.0f,
+	//Luz roja
+	spotLights[1] = SpotLight(1.0f, 0.0f, 0.0f,
 		1.0f, 2.0f,
 		-20.0f, 25.0f, 10.0f, //25
 		0.0f, 0.4f, -1.000f,
@@ -558,8 +617,8 @@ int main()
 		15.0f);
 	spotLightCount++;
 
-	
-	spotLights[3] = SpotLight(1.0f, 1.0f, 1.0f,
+	//luz blanca
+	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
 		1.0f, 2.0f,
 		0.0f, 45.0f, 280.0f, //25
 		0.0f, 3.0f, -1.000f,
@@ -567,15 +626,154 @@ int main()
 		110.0f);
 	spotLightCount++;
 
-	spotLights2[0] = spotLights[0];
-	spotLights2[1] = spotLights[2];
-	spotLights2[2] = spotLights[3];
-	spotLights2[3] = spotLights[1];
+	int  spotLightCount2 = 0;
+	//Luz Verde
+	spotLights2[1] = SpotLight(0.0f, 1.0f, 0.0f,
+		1.0f, 2.0f,
+		-20.0f, 25.0f, 210.0f, //25
+		0.0f, 1.0f, 1.000f,
+		1.0f, 0.0f, 0.0f,
+		55.0f);
+	spotLightCount2++;
 
-	spotLights3[0] = spotLights[0];
-	spotLights3[1] = spotLights[1];
-	spotLights3[2] = spotLights[3];
-	spotLights3[3] = spotLights[2];
+	//Luz roja
+	spotLights2[0] = SpotLight(1.0f, 0.0f, 0.0f,
+		1.0f, 2.0f,
+		-20.0f, 25.0f, 10.0f, //25
+		0.0f, 0.4f, -1.000f,
+		1.0f, 0.0f, 0.0f,
+		15.0f);
+	spotLightCount2++;
+
+	//luz blanca
+	spotLights2[2] = SpotLight(1.0f, 1.0f, 1.0f,
+		1.0f, 2.0f,
+		0.0f, 45.0f, 280.0f, //25
+		0.0f, 3.0f, -1.000f,
+		1.0f, 0.0f, 0.0f,
+		110.0f);
+	spotLightCount2++;
+
+	int  spotLightCount3 = 0;
+	//Luz Verde
+	spotLights3[0] = SpotLight(0.0f, 1.0f, 0.0f,
+		1.0f, 2.0f,
+		-20.0f, 25.0f, 210.0f, //25
+		0.0f, 1.0f, 1.000f,
+		1.0f, 0.0f, 0.0f,
+		55.0f);
+	spotLightCount3++;
+
+	//Luz roja
+	spotLights3[2] = SpotLight(1.0f, 0.0f, 0.0f,
+		1.0f, 2.0f,
+		-20.0f, 25.0f, 10.0f, //25
+		0.0f, 0.4f, -1.000f,
+		1.0f, 0.0f, 0.0f,
+		15.0f);
+	spotLightCount3++;
+
+	//luz blanca
+	spotLights3[1] = SpotLight(1.0f, 1.0f, 1.0f,
+		1.0f, 2.0f,
+		0.0f, 45.0f, 280.0f, //25
+		0.0f, 3.0f, -1.000f,
+		1.0f, 0.0f, 0.0f,
+		110.0f);
+	spotLightCount3++;
+
+
+
+
+	
+	/*Key frames no volatiles*/
+	KeyFrame[0].movAvion_x = 0.0f;
+	KeyFrame[0].movAvion_y = 0.0f;
+	KeyFrame[0].movAvion_z = 0.0f;
+	KeyFrame[0].giroAvion = 0;
+
+	KeyFrame[1].movAvion_x = 0.0f;
+	KeyFrame[1].movAvion_y = 56.0f;
+	KeyFrame[1].movAvion_z = -250.0f;
+	KeyFrame[1].giroAvion = 0;
+
+	KeyFrame[2].movAvion_x = -4.0f;
+	KeyFrame[2].movAvion_y = 62.0f;
+	KeyFrame[2].movAvion_z = -275.0f;
+	KeyFrame[2].giroAvion = 0;
+
+	KeyFrame[3].movAvion_x = -10.0f;
+	KeyFrame[3].movAvion_y = 68.0f;
+	KeyFrame[3].movAvion_z = -300.0f;
+	KeyFrame[3].giroAvion = 0;
+
+	KeyFrame[4].movAvion_x = -22.0f;
+	KeyFrame[4].movAvion_y = 73.0f;
+	KeyFrame[4].movAvion_z = -325.0f;
+	KeyFrame[4].giroAvion = 0;
+
+	KeyFrame[5].movAvion_x = -43.0f;
+	KeyFrame[5].movAvion_y = 79.0f;
+	KeyFrame[5].movAvion_z = -350.0f;
+	KeyFrame[5].giroAvion = 0;
+
+	KeyFrame[6].movAvion_x = -96.0f;
+	KeyFrame[6].movAvion_y = 84.0f;
+	KeyFrame[6].movAvion_z = -375.0f;
+	KeyFrame[6].giroAvion = 0;
+
+	KeyFrame[7].movAvion_x = -157.0f;
+	KeyFrame[7].movAvion_y = 70.0f;
+	KeyFrame[7].movAvion_z = -314.0f;
+	KeyFrame[7].giroAvion = 0;
+
+	KeyFrame[8].movAvion_x = -141.0f;
+	KeyFrame[8].movAvion_y = 67.0f;
+	KeyFrame[8].movAvion_z = -297.0f;
+	KeyFrame[8].giroAvion = 0;
+
+	KeyFrame[9].movAvion_x = -164.0f;
+	KeyFrame[9].movAvion_y = 54.0f;
+	KeyFrame[9].movAvion_z = -239.0f;
+	KeyFrame[9].giroAvion = 0;
+
+	KeyFrame[10].movAvion_x = -106.0f;
+	KeyFrame[10].movAvion_y = 30.0f;
+	KeyFrame[10].movAvion_z = -131.0f;
+	KeyFrame[10].giroAvion = 0;
+
+	KeyFrame[11].movAvion_x = -94.0f;
+	KeyFrame[11].movAvion_y = 29.0f;
+	KeyFrame[11].movAvion_z = -131.0f;
+	KeyFrame[11].giroAvion = 0;
+
+	KeyFrame[12].movAvion_x = -89.0f;
+	KeyFrame[12].movAvion_y = 28.0f;
+	KeyFrame[12].movAvion_z = -126.0f;
+	KeyFrame[12].giroAvion = 0;
+
+	KeyFrame[13].movAvion_x = -68.0f;
+	KeyFrame[13].movAvion_y = 16.0f;
+	KeyFrame[13].movAvion_z = -71.0f;
+	KeyFrame[13].giroAvion = 0;
+
+	KeyFrame[14].movAvion_x = -122.0f;
+	KeyFrame[14].movAvion_y = -6.0f;
+	KeyFrame[14].movAvion_z = 35.0f;
+	KeyFrame[14].giroAvion = 0;
+	
+	//animacion de lamb lloron
+	GLboolean seleccionaLagrima = true;
+	float contadorLambLlora = 0.0;
+	float incrementoLagrima1 = 0.0;
+	float incrementoLagrima2 = 0.0;
+
+	float incrementoLagrima3 = 0.0f;
+	GLboolean seleccionaLagrima2 = true;
+	float incrementoLagrima4 = 0.0f;
+	float contadorLambLlora2 = 0.0f;
+
+	
 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
@@ -591,7 +789,65 @@ int main()
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
 	{
+
+		if (contadorCiclos >= 63.0) {
+			if (reproduciranimacion < 1)
+			{
+				if (play == false && (FrameIndex > 1))
+				{
+					resetElements();
+					//First Interpolation				
+					interpolation();
+					play = true;
+					playIndex = 0;
+					i_curr_steps = 0;
+					reproduciranimacion++;
+					printf("\n presiona 0 para habilitar reproducir de nuevo la animación'\n");
+					habilitaranimacion = 0;
+
+				}
+				else
+				{
+					play = false;
+
+				}
+			}
+		}
 		
+
+		if (animacionLambLlorra) {
+			//Hay que indicar el maximo que debe de alcanzar
+			if (incrementoLagrima1 >= 26.0) seleccionaLagrima = false;
+			if (incrementoLagrima2 >= 26.0) seleccionaLagrima = true;
+			if (contadorLambLlora >= 0.5) {
+				if (seleccionaLagrima) incrementoLagrima1 += 0.1;
+				else incrementoLagrima2 += 0.1;
+				if (incrementoLagrima2 >= 26.0 && incrementoLagrima1 >= 26.0) {
+					//animacionLambLlorra = false;
+					incrementoLagrima1 = 0.0f;
+					incrementoLagrima2 = 0.0f;
+				}
+				contadorLambLlora = 0.0;
+			}
+			contadorLambLlora += deltaTime * 1.0;
+
+			if (incrementoLagrima3 >= 26.0) seleccionaLagrima2 = false;
+			if (incrementoLagrima4 >= 26.0) seleccionaLagrima2 = true;
+			if (contadorLambLlora2 >= 0.5) {
+				if (seleccionaLagrima2) incrementoLagrima3 += 0.1;
+				else incrementoLagrima4 += 0.1;
+				if (incrementoLagrima3 >= 26.0 && incrementoLagrima4 >= 26.0) {
+					animacionLambLlorra = false;
+					incrementoLagrima3 = 0.0f;
+					incrementoLagrima4 = 0.0f;
+				}
+				contadorLambLlora2 = 0.0;
+			}
+			contadorLambLlora2 += deltaTime * 1.0;
+			
+		}
+
+
 		GLfloat now = glfwGetTime();
 		deltaTime = now - lastTime;
 		deltaTime += (now - lastTime) / limitFPS;
@@ -631,6 +887,11 @@ int main()
 			}
 			//Avanza el contador s
 			contadorPalanca += deltaTime * 1;
+			contadorCiclos += deltaTime * 1.0;
+
+		}
+		else{
+			contadorCiclos = 0;
 		}
 
 		//Animacion de paleta 1
@@ -728,57 +989,50 @@ int main()
 		// luz ligada a la cámara de tipo flash
 		glm::vec3 lowerLight = camera.getCameraPosition();
 		lowerLight.y -= 0.3f;
-		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
+		
+
+
+		//Manejo de luces
+
+		shaderList[0].SetSpotLights(spotLights, spotLightCount );
+
+		if (!luz1) {
+			shaderList[0].SetSpotLights(spotLights, spotLightCount - 1);
+		}
+
+		if (!luz2) {
+			shaderList[0].SetSpotLights(spotLights2, spotLightCount2 - 1);
+		}
+
+		if (!luz3) {
+			shaderList[0].SetSpotLights(spotLights3, spotLightCount3 - 1);
+		}
+
+		if (!luz1 && !luz3) {
+			shaderList[0].SetSpotLights(spotLights, spotLightCount - 2);
+		}
+
+		if (!luz1 && !luz2) {
+			shaderList[0].SetSpotLights(spotLights2, spotLightCount2 - 2);
+		}
+
+		if (!luz2 && !luz3) {
+			shaderList[0].SetSpotLights(spotLights3, spotLightCount3 - 2);
+		}
+
+		if (!luz3 && !luz2 && !luz1) {
+			shaderList[0].SetSpotLights(spotLights, spotLightCount - 3);
+		}
+
+
+		////Manejo de luces
+		//spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
 		//información al shader de fuentes de iluminación
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
-		shaderList[0].SetSpotLights(spotLights, spotLightCount);
+		//shaderList[0].SetSpotLights(spotLights, spotLightCount);
 
-		//apagar y prender luces
-		GLboolean banderaun = false;
-		GLboolean banderaDS = false;
-		GLboolean banderaTRE = false;
-
-		if (mainWindow.getarregloluces() == 1)
-		{
-			if (inputKeyframes.linterna() == true)
-			{
-
-				shaderList[0].SetSpotLights(spotLights, spotLightCount);
-			}
-			else
-			{
-
-				shaderList[0].SetSpotLights(spotLights, spotLightCount-1);
-			}
-
-		}
-		else
-		{
-			if (inputKeyframes.linterna() == true)
-			{
-
-				shaderList[0].SetSpotLights(spotLights2, spotLightCount);
-			}
-			else
-			{
-				shaderList[0].SetSpotLights(spotLights2, spotLightCount-1);
-			}
-		}
-
-/*
-		if (mainWindow.getlinterna() == true)
-		{
-
-			shaderList[0].SetSpotLights(spotLights3, spotLightCount);
-		}
-		else
-		{
-			shaderList[0].SetSpotLights(spotLights3, spotLightCount - 1);
-		}
-
-		*/
 
 
 		glm::mat4 model(1.0);
@@ -920,27 +1174,27 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 
+		//Cilindro Lanzapelota
 		modelaux = model;
-		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f + palancaCrece, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		paloLanzaPelota_M.RenderModel();
 
+		//Base Lanzapelota
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0));
-		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		baseLanzaPelota_M.RenderModel();
 
+		//Bola lanzapelota
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.0f, -3.9f + (palancaCrece *9), 0.0));
-		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		bola_M.RenderModel();
 
-
+		
 		model = glm::mat4(1.0); 
 		//model = glm::translate(model, glm::vec3(-80.0f + movAvion_x, 75.0f + movAvion_y, 0.0f + movAvion_z));
 		model = glm::translate(model, glm::vec3(-80.0f , 75.0f , 0.0f ));
@@ -951,28 +1205,43 @@ int main()
 
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(103.7f , 18.0f , 225.0f ));
-		//model = glm::translate(model, glm::vec3(-80.0f, 75.0f, 0.0f));
-		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.7f, 0.7f, 0.7f));
+		model = glm::translate(model, glm::vec3(106.7f + movAvion_x, 23.0f + movAvion_y, 223.0f + movAvion_z));
+		//model = glm::translate(model, glm::vec3(105.7f, 23.0f, 220.0f));
+		model = glm::rotate(model, giroAvion * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.47f , 0.47f , 0.47f ));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		canica_M.RenderModel();
-
+		
+		//Resorte
 		model = glm::mat4(1.0);
 		//model = glm::translate(model, glm::vec3(103.0f + movAvion_x, 18.0f + movAvion_y, 272.0f + movAvion_z));
 		model = glm::translate(model, glm::vec3(103.0f, 18.0f, 272.0f));
 		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::rotate(model, (283 + movAvion_x) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		//model = glm::rotate(model, (283 + movAvion_x) * toRadians, gl91229129m::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, (283) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		modelaux = model;
 		model = glm::scale(model, glm::vec3(4.3f , 4.3 - palancaCrece, 4.3));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		resorte_M.RenderModel();
 
 
+
+		//Superior Resorte
+		model = modelaux;
+		//model = glm::translate(model, glm::vec3(103.0f + movAvion_x, 18.0f + movAvion_y, 272.0f + movAvion_z));
+		model = glm::translate(model, glm::vec3(0.0f , -1.0f - ( palancaCrece * 5), 0.0f ));
+		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		//model = glm::rotate(model, (283 + movAvion_x) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(4.3f, 4.3 , 4.3));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		resorteS_M.RenderModel();
+		
+
+
 		//Lagrima derecha 1
 		model = glm::mat4(1.0);
 		//model = glm::translate(model, glm::vec3(-82.5.0f + movAvion_x, 82.0f + movAvion_y, 6.0f + movAvion_z));
-		model = glm::translate(model, glm::vec3(-74.5f , 90.0f + movAvion_y, 6.0f ));
+		model = glm::translate(model, glm::vec3(-74.5f , 90.0f - incrementoLagrima1, 6.0f ));
 		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		//model = glm::rotate(model, (283 + movAvion_x) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(.2f, .2f, .2f));
@@ -982,7 +1251,7 @@ int main()
 		//Lagrima derecha 2
 		model = glm::mat4(1.0);
 		//model = glm::translate(model, glm::vec3(-82.5.0f + movAvion_x, 82.0f + movAvion_y, 6.0f + movAvion_z));
-		model = glm::translate(model, glm::vec3(-76.5f , 90.0f  , 6.0f  ));
+		model = glm::translate(model, glm::vec3(-76.5f , 90.0f - incrementoLagrima2, 6.0f  ));
 		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		//model = glm::rotate(model, (283 + movAvion_x) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(.2f,.2f,.2f));
@@ -993,7 +1262,7 @@ int main()
 		//Lagrima ojo izquierdo 1
 		model = glm::mat4(1.0);
 		//model = glm::translate(model, glm::vec3(-82.5.0f + movAvion_x, 82.0f + movAvion_y, 6.0f + movAvion_z));
-		model = glm::translate(model, glm::vec3(-82.5f, 90.0f, 6.0f));
+		model = glm::translate(model, glm::vec3(-82.5f, 90.0f - incrementoLagrima3, 6.0f));
 		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		//model = glm::rotate(model, (283 + movAvion_x) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(.2f, .2f, .2f));
@@ -1003,19 +1272,55 @@ int main()
 		//Lagrima ojo izquierdo 2
 		model = glm::mat4(1.0);
 		//model = glm::translate(model, glm::vec3(-82.5.0f + movAvion_x, 82.0f + movAvion_y, 6.0f + movAvion_z));
-		model = glm::translate(model, glm::vec3(-84.5f, 90.0f, 6.0f));
+		model = glm::translate(model, glm::vec3(-84.5f, 90.0f - incrementoLagrima4, 6.0f));
 		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		//model = glm::rotate(model, (283 + movAvion_x) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(.2f, .2f, .2f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		lagrima_M.RenderModel();
 
+		color = glm::vec3(0.0f, 1.0f, 0.0f);
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(55.5f, 83.0f , -3.0f ));
+		model = glm::rotate(model, 270  * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(14.0f, 14.0f, 10.0f));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pisoTexture.UseTexture();
+		meshList[7]->RenderMesh();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(55.5f, 89.0f, -3.0f));
+		model = glm::rotate(model, 270 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(14.0f, 14.0f, 10.0f));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pisoTexture.UseTexture();
+		meshList[7]->RenderMesh();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(55.5f, 95.0f, -3.0f));
+		model = glm::rotate(model, 270 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(14.0f, 14.0f, 10.0f));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pisoTexture.UseTexture();
+		meshList[7]->RenderMesh();
+
+
+		color = glm::vec3(0.66f, 0.33f, 0.0f);
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(48.5f , 78.0f , 4.0f ));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pisoTexture.UseTexture();
+		meshList[8]->RenderMesh();
+
+
+		
+
 		glDisable(GL_BLEND);
-		
-		
-
-
-
 		glUseProgram(0);
 
 		mainWindow.swapBuffers();
@@ -1027,40 +1332,14 @@ int main()
 
 void inputKeyframes(bool* keys)
 {
-	if (keys[GLFW_KEY_SPACE])
-	{
-		if (reproduciranimacion < 1)
-		{
-			if (play == false && (FrameIndex > 1))
-			{
-				resetElements();
-				//First Interpolation				
-				interpolation();
-				play = true;
-				playIndex = 0;
-				i_curr_steps = 0;
-				reproduciranimacion++;
-				printf("\n presiona 0 para habilitar reproducir de nuevo la animación'\n");
-				habilitaranimacion = 0;
-
-			}
-			else
-			{
-				play = false;
-
-			}
-		}
-	}
+		
 	//Entra tantas veces como ciclos de reloj se su procesador
 
 	if (keys[GLFW_KEY_0])
 	{
-		if (habilitaranimacion < 1 && reproduciranimacion>0)
-		{
-			printf("Ya puedes reproducir de nuevo la animación con la tecla de barra espaciadora'\n");
-			reproduciranimacion = 0;
-			
-		}
+		//printf("Ya puedes reproducir de nuevo la animación con la tecla de barra espaciadora'\n");
+		reproduciranimacion = 0;
+		
 	}
 
 	if (keys[GLFW_KEY_L])
@@ -1206,8 +1485,9 @@ void inputKeyframes(bool* keys)
 
 	if (keys[GLFW_KEY_C])
 	{
+		//contadorCiclos = 0;
 		banderaPalanca = true;
-
+		reproduciranimacion = 0;
 	}
 	if (keys[GLFW_KEY_V])
 	{
@@ -1215,25 +1495,43 @@ void inputKeyframes(bool* keys)
 		//animacionLambLlorra = true
 
 	}
-
-	if (keys[GLFW_KEY_O])
+	
+	
+	if (keys[GLFW_KEY_B])
 	{
-		linterna = false;
+		animacionLambLlorra = true;
+
 	}
 
-	if (keys[GLFW_KEY_P])
+	if (keys[GLFW_KEY_F])
 	{
-		linterna = true;
+		luz1 = false;
+		
 	}
 
-	if (keys[GLFW_KEY_N])
-	{
-
-		arreglo_luces = 1.0f;
+	if (keys[GLFW_KEY_G])
+	{		
+		luz1 = true;
 	}
-	if (keys[GLFW_KEY_M])
+
+	if (keys[GLFW_KEY_H])
 	{
-		arreglo_luces = 2.0f;
+		luz2 = false;
+	}
+
+	if (keys[GLFW_KEY_J])
+	{
+		luz2 = true;
+	}
+
+	if (keys[GLFW_KEY_K])
+	{
+		luz3 = false;
+	}
+
+	if (keys[GLFW_KEY_L])
+	{
+		luz3 = true;
 	}
 
 }
