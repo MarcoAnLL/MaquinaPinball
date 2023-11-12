@@ -567,19 +567,19 @@ int main()
 	resorte_M.LoadModel("Models/resorte.obj");
 
 	resorteS_M = Model();
-	resorteS_M.LoadModel("Models/superiorResorte.obj");
+	resorteS_M.LoadModel("Models/superriorResorte.obj");
 
 	canica_M = Model();
 	canica_M.LoadModel("Models/cascabel.obj");
 
 	std::vector<std::string> skyboxFaces;
 	
-	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_rt.tga");
-	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_lf.tga");
-	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_dn.tga");
-	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_up.tga");
-	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_bk.tga");
-	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_ft.tga");
+	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+	skyboxFaces.push_back("Textures/Skybox/paisaje.tga");
+	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
 
 	skybox = Skybox(skyboxFaces);
 
@@ -889,6 +889,7 @@ int main()
 			contadorPalanca += deltaTime * 1;
 			contadorCiclos += deltaTime * 1.0;
 
+			printf("numero de ciclos %d\n", contadorCiclos); //Checarsadsakldjasllllllllllllllllllllllllllllllllllllllllllllllll
 		}
 		else{
 			contadorCiclos = 0;
@@ -1042,8 +1043,8 @@ int main()
 		
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(30.0f, 1.0f, 30.0f));
+		model = glm::translate(model, glm::vec3(0.0f, -420.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(40.0f, 1.0f, 40.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
