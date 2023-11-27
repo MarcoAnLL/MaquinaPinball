@@ -34,6 +34,7 @@
 #include "Material.h"
 const float toRadians = 3.14159265f / 180.0f;
 
+
 //variables para animación
 float movOffset;
 bool avanza;
@@ -574,15 +575,7 @@ int main()
 
 	std::vector<std::string> skyboxFaces;
 	
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisaje.tga");
-	skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-
-	skybox = Skybox(skyboxFaces);
-
+	
 	Material_brillante = Material(4.0f, 256);
 	Material_opaco = Material(0.3f, 6);
 
@@ -773,8 +766,11 @@ int main()
 	float incrementoLagrima4 = 0.0f;
 	float contadorLambLlora2 = 0.0f;
 
-	
 
+	//Variables dia y noche
+	//////////////////////////////////////
+	int ciclos = 0;
+	GLboolean dia = true;
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
 		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset=0;
@@ -789,7 +785,33 @@ int main()
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
 	{
-
+		if (ciclos >= 0) dia = true;
+		if (ciclos >= 100) dia = false;
+		if (ciclos >= 200) ciclos = 0;
+		else ciclos++;
+		//SkyBox
+		if (dia) {
+			skyboxFaces.clear();
+			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisaje.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+			skybox = Skybox(skyboxFaces);
+		}
+		else {
+			skyboxFaces.clear();
+			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_rt.tga");
+			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_lf.tga");
+			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_bk.tga");
+			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_up.tga");
+			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_bk.tga");
+			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_ft.tga");
+			skybox = Skybox(skyboxFaces);
+		}
+		printf("Ciclos %d\n", ciclos);
+	skybox = Skybox(skyboxFaces);
 		if (contadorCiclos >= 63.0) {
 			if (reproduciranimacion < 1)
 			{
