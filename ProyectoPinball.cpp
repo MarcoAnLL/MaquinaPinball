@@ -34,7 +34,6 @@
 #include "Material.h"
 const float toRadians = 3.14159265f / 180.0f;
 
-
 //variables para animación
 float movOffset;
 bool avanza;
@@ -57,6 +56,14 @@ GLboolean luz1 = true;
 GLboolean luz2 = true;
 GLboolean luz3 = true;
 
+//Animacion canica simple
+int animacionSimplex = 0;
+int animacionSimpley = 0;
+int animacionSimplez = 0;
+GLboolean animacionCanicaSimple = false;
+
+
+
 //Movimiento de palanca
 GLboolean banderaPalanca = false;
 int movimientoPalanca = 0;
@@ -64,6 +71,8 @@ int movimientoPalanca = 0;
 float palancaCrece = 0;
 float contadorPalanca = 0.0f;
 //
+
+int selectorCamara = 1;
 
 
 GLboolean incrementaPaleta1 = true;
@@ -76,15 +85,49 @@ std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
 
 Camera camera;
+Camera camera2;
 
 Texture brickTexture;
 Texture plainTexture;
 Texture pisoTexture;
-
+Texture escudo;
 
 Texture rojo;
 Texture plata;
 Texture negro;
+
+/// 
+/// / contador de puntos
+/// 
+Texture NumerosTexture;
+Texture Numero1Texture;
+Texture Numero2Texture;
+Texture Numero3Texture;
+Texture Numero4Texture;
+Texture Numero5Texture;
+Texture Numero6Texture;
+Texture Numero7Texture;
+Texture Numero8Texture;
+Texture Numero9Texture;
+
+
+///apuntadores
+Texture flecha1;
+Texture flecha2;
+Texture flecha3;
+Texture flecha4;
+Texture flecha5;
+
+int contadordecimales = 0;
+int contadorUnidad = 0;
+
+float toffsetflechau = 0.0f;
+float toffsetflechav = 0.0f;
+float toffsetnumerou = 0.0f;
+float toffsetnumerov = 0.0f;
+float toffsetnumerocambiau = 0.0;
+float angulovaria = 0.0f;
+
 
 ////////////Declaracion de modelos///////////////////
 Model espada_M;
@@ -102,7 +145,7 @@ Model resorte_M;
 Model resorteS_M;
 Model lagrima_M;
 Model canica_M;
-
+Model canica2_M;
 
 
 Skybox skybox;
@@ -507,6 +550,16 @@ int contadorCiclos = 0;
 
 int main()
 {
+	//Variables para la puntuacion
+		int cambiaUnidades = 0;
+		int cambiaDecenas = 0;
+		int cambiaCentenas = 0;
+		int cambiaMiles = 0;
+		int cambiaDiezmiles = 0;
+		int cambiaCienmiles = 0;
+		int timepoPuntuacion = 0;
+
+
 	mainWindow = Window(1366, 768); // 1280, 1024 or 1024, 768
 	mainWindow.Initialise();
 	
@@ -516,6 +569,7 @@ int main()
 	CrearCubo();
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
+	camera2 = Camera(glm::vec3(350.0f, 520.0f, 480.0f), glm::vec3(0.0f, 1.0f, 0.0f), -120.0f, -30.0f, 25.0f, 0.5f);
 
 	brickTexture = Texture("Textures/brick.png");
 	brickTexture.LoadTextureA();
@@ -523,6 +577,55 @@ int main()
 	plainTexture.LoadTextureA();
 	pisoTexture = Texture("Textures/pasto.tga");
 	pisoTexture.LoadTextureA();
+
+	NumerosTexture = Texture("Textures/Puntero/numeros-0.tga");
+	NumerosTexture.LoadTextureA();
+
+	Numero1Texture = Texture("Textures/Puntero/numeros-1.tga");
+	Numero1Texture.LoadTextureA();
+
+	Numero2Texture = Texture("Textures/Puntero/numeros-2.tga");
+	Numero2Texture.LoadTextureA();
+
+	Numero3Texture = Texture("Textures/Puntero/numeros-3.tga");
+	Numero3Texture.LoadTextureA();
+
+	Numero4Texture = Texture("Textures/Puntero/numeros-4.tga");
+	Numero4Texture.LoadTextureA();
+
+	Numero5Texture = Texture("Textures/Puntero/numeros-5.tga");
+	Numero5Texture.LoadTextureA();
+
+	Numero6Texture = Texture("Textures/Puntero/numeros-6.tga");
+	Numero6Texture.LoadTextureA();
+
+	Numero7Texture = Texture("Textures/Puntero/numeros-7.tga");
+	Numero7Texture.LoadTextureA();
+
+	Numero8Texture = Texture("Textures/Puntero/numeros-8.tga");
+	Numero8Texture.LoadTextureA();
+
+	Numero9Texture = Texture("Textures/Puntero/numeros-9.tga");
+	Numero9Texture.LoadTextureA();
+
+	escudo = Texture("Textures/escudo.tga");
+	escudo.LoadTextureA();
+
+	flecha1 = Texture("Textures/apuntadores/flecha1.tga");
+	flecha1.LoadTextureA();
+
+	flecha2 = Texture("Textures/apuntadores/flecha2.tga");
+	flecha2.LoadTextureA();
+
+	flecha3 = Texture("Textures/apuntadores/flecha3.tga");
+	flecha3.LoadTextureA();
+
+	flecha4 = Texture("Textures/apuntadores/flecha4.tga");
+	flecha4.LoadTextureA();
+
+	flecha5 = Texture("Textures/apuntadores/flecha5.tga");
+	flecha5.LoadTextureA();
+
 	
 	///////////////////Ruta de los modelos ///////////////////////////////
 
@@ -573,9 +676,14 @@ int main()
 	canica_M = Model();
 	canica_M.LoadModel("Models/cascabel.obj");
 
-	std::vector<std::string> skyboxFaces;
+	canica2_M = Model();
+	canica2_M.LoadModel("Models/canica-madera.obj");
+
+
+	//std::vector<std::string> skyboxFaces;
 	
 	
+
 	Material_brillante = Material(4.0f, 256);
 	Material_opaco = Material(0.3f, 6);
 
@@ -766,11 +874,11 @@ int main()
 	float incrementoLagrima4 = 0.0f;
 	float contadorLambLlora2 = 0.0f;
 
-
 	//Variables dia y noche
 	//////////////////////////////////////
 	int ciclos = 0;
 	GLboolean dia = true;
+
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
 		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset=0;
@@ -782,15 +890,67 @@ int main()
 		printf("3.-Presiona L para guardar frame\n4.-Presiona P para habilitar guardar nuevo frame\n5.-Presiona 1 para mover en X\n6.-Presiona 2 para habilitar mover en X");
 
 		GLboolean incrementaPalanca = true;
+		
+	//Animacion canica sencilla
+	GLboolean animacionCanicaSimple2 = false;
+	GLboolean animacionCanicaSimple3 = false;
+	GLboolean animacionCanicaSimple4 = false;
+
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
 	{
+		
+		GLfloat now = glfwGetTime();
+		deltaTime = now - lastTime;
+		deltaTime += (now - lastTime) / limitFPS;
+		lastTime = now;
+		
+		if (animacionCanicaSimple) {
+			
+			if (animacionSimplex < 53) animacionSimplex++;
+			else {
+				animacionCanicaSimple = false;
+				animacionCanicaSimple2 = true;
+			}
+			if (animacionSimpley < 6 && (animacionSimplex % 5) == 0) animacionSimpley++;
+			if (animacionSimplez > -28) animacionSimplez--;
+		}
+		if (animacionCanicaSimple2) {
+			if (animacionSimplex < 102) animacionSimplex++;
+			if (animacionSimpley > -15 && (animacionSimplez % 4) == 0) animacionSimpley--;
+			if (animacionSimplez < 74) animacionSimplez++;
+			else {
+				animacionCanicaSimple2 = false;
+				animacionCanicaSimple3 = true;
+			}
+		}
+		if (animacionCanicaSimple3) {
+			
+			if (animacionSimpley > -77 &&(animacionSimplez % 4) == 0) animacionSimpley--;
+			if (animacionSimplez < 356) animacionSimplez++;
+			else {
+				animacionCanicaSimple3 = false;
+				animacionCanicaSimple4 = true;
+			}
+		}
+
+		if (animacionCanicaSimple4) {
+			if (animacionSimplex > 63 ) animacionSimplex -=2;
+			if (animacionSimpley > -90 && (animacionSimplez % 2) == 0) animacionSimpley--;
+			if (animacionSimplez < 395) animacionSimplez++;
+			else {
+				animacionCanicaSimple4 = false;
+			}
+		}
+
+
 		if (ciclos >= 0) dia = true;
 		if (ciclos >= 100) dia = false;
 		if (ciclos >= 200) ciclos = 0;
 		else ciclos++;
 		//SkyBox
 		if (dia) {
+			std::vector<std::string> skyboxFaces;
 			skyboxFaces.clear();
 			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
 			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
@@ -801,17 +961,19 @@ int main()
 			skybox = Skybox(skyboxFaces);
 		}
 		else {
+			std::vector<std::string> skyboxFaces;
 			skyboxFaces.clear();
-			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_rt.tga");
-			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_lf.tga");
-			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_bk.tga");
-			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_up.tga");
-			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_bk.tga");
-			skyboxFaces.push_back("Textures/Skybox/cupertin-lake-night_ft.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisaje-noche.tga");
+			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
 			skybox = Skybox(skyboxFaces);
+
 		}
-		printf("Ciclos %d\n", ciclos);
-	skybox = Skybox(skyboxFaces);
+		
+
 		if (contadorCiclos >= 63.0) {
 			if (reproduciranimacion < 1)
 			{
@@ -869,14 +1031,7 @@ int main()
 			
 		}
 
-
-		GLfloat now = glfwGetTime();
-		deltaTime = now - lastTime;
-		deltaTime += (now - lastTime) / limitFPS;
-		lastTime = now;
-
-		
-		if (contadorLamb < 1) {
+		if (contadorLamb < 5) {
 			//Brazos
 			if (anguloLambBrazos == -45) incrementaLambBrazos = true;
 			if (anguloLambBrazos == 45) incrementaLambBrazos = false;
@@ -890,7 +1045,7 @@ int main()
 			contadorLamb = 0;
 		}
 
-		contadorLamb = deltaTime * 1;
+		contadorLamb +=  1;
 
 		if (banderaPalanca == true) {
 			//Verifica si al angulo limite de la paleta, el angulo limite es de  45 Grados
@@ -992,7 +1147,13 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		skybox.DrawSkybox(camera.calculateViewMatrix(), projection);
+		if(selectorCamara==1){
+			skybox.DrawSkybox(camera.calculateViewMatrix(), projection);
+		}
+		if(selectorCamara==2){
+			skybox.DrawSkybox(camera2.calculateViewMatrix(), projection);
+		}
+		
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
@@ -1006,8 +1167,20 @@ int main()
 		uniformShininess = shaderList[0].GetShininessLocation();
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
-		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+		//glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+		//glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+		if (selectorCamara == 2) {
+			camera2.keyControl(mainWindow.getsKeys(), deltaTime * 0.5f);
+			glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera2.calculateViewMatrix()));
+			glUniform3f(uniformEyePosition, camera2.getCameraPosition().x, camera2.getCameraPosition().y, camera2.getCameraPosition().z);
+		}
+		if (selectorCamara == 1) {
+			camera.keyControl(mainWindow.getsKeys(), deltaTime * 5);
+			camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+			glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+			glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+			
+		}
 
 		// luz ligada a la cámara de tipo flash
 		glm::vec3 lowerLight = camera.getCameraPosition();
@@ -1188,6 +1361,109 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		pierna1_M.RenderModel();
 
+		//// termina instancia 1 de lamb jerarquico 
+
+
+		//Inicia instancia 2 de lamb jerarquico
+
+		/*Modelo jerarquico de la LAMB*/
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(19.0, -18.0f, 114.0f));
+		//model = glm::translate(model, glm::vec3(-51.0f , 93.0f , -94.0 ));
+		model = glm::rotate(model, (290.0f) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+
+		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		modelaux = model;
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		cuerpo_M.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(28.0f, 0.0f, 68.0f));
+		//model = glm::rotate(model, * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, anguloLambBrazos * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		brazo1_M.RenderModel();
+
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(39.0f, 0.0f, 68.0f));
+		//model = glm::rotate(model, 180 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, anguloLambBrazos * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		//model = glm::rotate(model, giroAvion * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		brazo2_M.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(32.0f, -2.0f, 69.0f));
+		model = glm::rotate(model, -anguloLambPiernas * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pierna1_M.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(37.0f, -2.0f, 69.0f));
+		model = glm::rotate(model, anguloLambPiernas * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pierna1_M.RenderModel();
+
+		//// termina instancia 2 de lamb jerarquico 
+
+
+
+		//Inicia instancia 3 de lamb jerarquico
+
+		/*Modelo jerarquico de la LAMB*/
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(17.0f, 8.0f, 27.0));
+		//model = glm::translate(model, glm::vec3(-51.0f , 93.0f , -94.0 ));
+		model = glm::rotate(model, (290.0f) * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+
+		//model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		modelaux = model;
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		cuerpo_M.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(28.0f, 0.0f, 68.0f));
+		//model = glm::rotate(model, * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, anguloLambBrazos * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		brazo1_M.RenderModel();
+
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(39.0f, 0.0f, 68.0f));
+		//model = glm::rotate(model, 180 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, anguloLambBrazos * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		//model = glm::rotate(model, giroAvion * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		brazo2_M.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(32.0f, -2.0f, 64.0f));
+		model = glm::rotate(model, -anguloLambPiernas * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pierna1_M.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(37.0f, -2.0f, 64.0f));
+		model = glm::rotate(model, anguloLambPiernas * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		pierna1_M.RenderModel();
+
+		//// termina instancia 3 de lamb jerarquico 
+
 
 
 		
@@ -1341,7 +1617,514 @@ int main()
 		meshList[8]->RenderMesh();
 
 
+		///////////////////////////escudos
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-140.0f+movAvion_x, 230.0f + movAvion_y, -80.0f + movAvion_z));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(150.0f, 150.0f, 150.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		escudo.UseTexture();
+		//Material_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		meshList[5]->RenderMesh();
+
+		///////////////////////////////////////////// Apuntadores
+
+		// textura con movimiento
+			//Importantes porque la variable uniform no podemos modificarla directamente
+			toffsetflechau += 0.001;
+		toffsetflechav += 0.0;
+		//para que no se desborde la variable
+		if (toffsetflechau > 1.0)
+			toffsetflechau = 0.0;
+		//if (toffsetv > 1.0)
+		//	toffsetv = 0;
+		//printf("\ntfosset %f \n", toffsetu);
+		//pasar a la variable uniform el valor actualizado
+		toffset = glm::vec2(toffsetflechau, toffsetflechav);
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(103.0f, 46.0f , 133.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f ));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, 13 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		//model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f+movAvion_x, 0.0f + movAvion_y, 0.0f + movAvion_z));
+		model = glm::scale(model, glm::vec3(40.0f, 550.0f, 13.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		flecha1.UseTexture();
+		
+		meshList[4]->RenderMesh();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-18.0f+movAvion_x, 89.0f+movAvion_y, 219.0+movAvion_z));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 45 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(40.0f, 550.0f, 13.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		flecha2.UseTexture();
+		
+		meshList[4]->RenderMesh();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(5.0f, 88.0f, 27.0));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(40.0f, 50.0f, 10.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		flecha3.UseTexture();
+		
+		meshList[4]->RenderMesh();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-10.0f, 88.0f, 27.0));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		flecha4.UseTexture();
+	
+		meshList[4]->RenderMesh();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(17.0f, 88.0f, 23.0));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		flecha5.UseTexture();
+		
+		meshList[4]->RenderMesh();
+
+		//Segunda canica
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-77.5f + animacionSimplex, 99.0f + animacionSimpley, -118.0f+ animacionSimplez));
+		model = glm::scale(model, glm::vec3(.47f, .47f, .47f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		canica2_M.RenderModel();
+
+
+
+
+
+
+
+		//////////////////////////////////////////////////////////
+		// //////////////////////////////////////////////////////////
+		// //////////////////////////////////////////////////////////
+		// //////////////////////////////////////////////////////////
+		// //////////////////////////////////////////////////////////
+		//plano con todos los números
+
+
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(130.0f, 230.0f, -235.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(glm::vec2(0.0f, 0.0f)));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+
+		//Antesde cade switch va la declaracion del objeto ya nada mas lo unico que cambia es la textura
+		switch (cambiaUnidades)
+		{
+		case 0:
+			NumerosTexture.UseTexture();
+			break;
+		case 1:
+			Numero1Texture.UseTexture();
+			break;
+
+		case 2:
+			Numero2Texture.UseTexture();
+			break;
+
+		case 3:
+			Numero3Texture.UseTexture();
+			break;
+
+		case 4:
+			Numero4Texture.UseTexture();
+			break;
+
+		case 5:
+			Numero5Texture.UseTexture();
+			break;
+
+		case 6:
+			Numero6Texture.UseTexture();
+			break;
+
+		case 7:
+			Numero7Texture.UseTexture();
+			break;
+
+		case 8:
+			Numero8Texture.UseTexture();
+			break;
+
+		case 9:
+			Numero9Texture.UseTexture();
+			break;
+		default:
+			break;
+		}
+		meshList[5]->RenderMesh();
+		if (timepoPuntuacion % 100 == 0 && timepoPuntuacion != 0) {
+			cambiaUnidades++;
+		}
+		if (cambiaUnidades == 10) {
+			cambiaUnidades = 0;
+			cambiaDecenas += 1;
+		}
+
+		timepoPuntuacion++;
+
+		//Aqui va el codigo para crear la primitiva, lo acomodas jeje
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(70.0f, 230.0f, -235.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(glm::vec2(0.0f, 0.0f)));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+
+		switch (cambiaDecenas)
+		{
+		case 0:
+			NumerosTexture.UseTexture();
+			break;
+		case 1:
+			Numero1Texture.UseTexture();
+			break;
+
+		case 2:
+			Numero2Texture.UseTexture();
+			break;
+
+		case 3:
+			Numero3Texture.UseTexture();
+			break;
+
+		case 4:
+			Numero4Texture.UseTexture();
+			break;
+
+		case 5:
+			Numero5Texture.UseTexture();
+			break;
+
+		case 6:
+			Numero6Texture.UseTexture();
+			break;
+
+		case 7:
+			Numero7Texture.UseTexture();
+			break;
+
+		case 8:
+			Numero8Texture.UseTexture();
+			break;
+
+		case 9:
+			Numero9Texture.UseTexture();
+			break;
+		default:
+			break;
+		}
+		meshList[5]->RenderMesh();
+
+		if (cambiaDecenas == 10) {
+			cambiaDecenas = 0;
+			cambiaCentenas += 1;
+		}
+
+		//Aqui va el codigo para crear la primitiva, lo acomodas jeje
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(20.0f, 230.0f, -235.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(glm::vec2(0.0f, 0.0f)));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+
+
+		switch (cambiaCentenas)
+		{
+		case 0:
+			NumerosTexture.UseTexture();
+			break;
+		case 1:
+			Numero1Texture.UseTexture();
+			break;
+
+		case 2:
+			Numero2Texture.UseTexture();
+			break;
+
+		case 3:
+			Numero3Texture.UseTexture();
+			break;
+
+		case 4:
+			Numero4Texture.UseTexture();
+			break;
+
+		case 5:
+			Numero5Texture.UseTexture();
+			break;
+
+		case 6:
+			Numero6Texture.UseTexture();
+			break;
+
+		case 7:
+			Numero7Texture.UseTexture();
+			break;
+
+		case 8:
+			Numero8Texture.UseTexture();
+			break;
+
+		case 9:
+			Numero9Texture.UseTexture();
+			break;
+		default:
+			break;
+		}
+		meshList[5]->RenderMesh();
+
+		if (cambiaCentenas == 10) {
+			cambiaCentenas = 0;
+			cambiaMiles += 1;
+		}
+		//Aqui va el codigo para crear la primitiva, lo acomodas jeje
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-30.0f, 230.0f, -235.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(glm::vec2(0.0f, 0.0f)));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+
+		switch (cambiaMiles)
+		{
+		case 0:
+			NumerosTexture.UseTexture();
+			break;
+		case 1:
+			Numero1Texture.UseTexture();
+			break;
+
+		case 2:
+			Numero2Texture.UseTexture();
+			break;
+
+		case 3:
+			Numero3Texture.UseTexture();
+			break;
+
+		case 4:
+			Numero4Texture.UseTexture();
+			break;
+
+		case 5:
+			Numero5Texture.UseTexture();
+			break;
+
+		case 6:
+			Numero6Texture.UseTexture();
+			break;
+
+		case 7:
+			Numero7Texture.UseTexture();
+			break;
+
+		case 8:
+			Numero8Texture.UseTexture();
+			break;
+
+		case 9:
+			Numero9Texture.UseTexture();
+			break;
+		default:
+			break;
+		}
+		meshList[5]->RenderMesh();
+		if (cambiaMiles == 10) {
+			cambiaMiles = 0;
+			cambiaDiezmiles += 1;
+		}
+
+		//Aqui va el codigo para crear la primitiva, lo acomodas jeje
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-85.0f, 230.0f, -235.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(glm::vec2(0.0f, 0.0f)));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+
+		switch (cambiaDiezmiles)
+		{
+		case 0:
+			NumerosTexture.UseTexture();
+			break;
+		case 1:
+			Numero1Texture.UseTexture();
+			break;
+
+		case 2:
+			Numero2Texture.UseTexture();
+			break;
+
+		case 3:
+			Numero3Texture.UseTexture();
+			break;
+
+		case 4:
+			Numero4Texture.UseTexture();
+			break;
+
+		case 5:
+			Numero5Texture.UseTexture();
+			break;
+
+		case 6:
+			Numero6Texture.UseTexture();
+			break;
+
+		case 7:
+			Numero7Texture.UseTexture();
+			break;
+
+		case 8:
+			Numero8Texture.UseTexture();
+			break;
+
+		case 9:
+			Numero9Texture.UseTexture();
+			break;
+		default:
+			break;
+		}
+		meshList[5]->RenderMesh();
+		if (cambiaDiezmiles == 10) {
+			cambiaDiezmiles = 0;
+			cambiaCienmiles += 1;
+		}
+
+		//Aqui va el codigo para crear la primitiva, lo acomodas jeje
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-140.0f, 230.0f, -235.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(glm::vec2(0.0f, 0.0f)));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+
+		switch (cambiaCienmiles)
+		{
+		case 0:
+			NumerosTexture.UseTexture();
+			break;
+		case 1:
+			Numero1Texture.UseTexture();
+			break;
+
+		case 2:
+			Numero2Texture.UseTexture();
+			break;
+
+		case 3:
+			Numero3Texture.UseTexture();
+			break;
+
+		case 4:
+			Numero4Texture.UseTexture();
+			break;
+
+		case 5:
+			Numero5Texture.UseTexture();
+			break;
+
+		case 6:
+			Numero6Texture.UseTexture();
+			break;
+
+		case 7:
+			Numero7Texture.UseTexture();
+			break;
+
+		case 8:
+			Numero8Texture.UseTexture();
+			break;
+
+		case 9:
+			Numero9Texture.UseTexture();
+			break;
+		default:
+			break;
+		}
+		meshList[5]->RenderMesh();
+		if (cambiaCienmiles == 10) {
+			cambiaCienmiles = 0;
+		}
+
+
+	
+		
+
+		
+		
+		
+		
+
+	
+	
+		
+
+		
+		
+		
+
+		
+		
+		
+
+	
+		
+		
+		
+	
+
+		
+
+
+
 
 		glDisable(GL_BLEND);
 		glUseProgram(0);
@@ -1557,4 +2340,21 @@ void inputKeyframes(bool* keys)
 		luz3 = true;
 	}
 
+	if (keys[GLFW_KEY_Q])
+{
+	animacionCanicaSimple = true;
+	animacionSimplex = 0;
+	animacionSimpley = 0;
+	animacionSimplez = 0;
+}
+
+	if (keys[GLFW_KEY_E])
+	{
+		selectorCamara = 1;
+	}
+
+	if (keys[GLFW_KEY_R])
+	{
+		selectorCamara = 2;
+	}
 }
