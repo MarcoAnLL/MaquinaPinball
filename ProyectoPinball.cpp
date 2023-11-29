@@ -568,7 +568,7 @@ int main()
 	crearPiramide();
 	CrearCubo();
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
+	camera = Camera(glm::vec3(-19.0f, 46.0f, 238.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
 	camera2 = Camera(glm::vec3(350.0f, 520.0f, 480.0f), glm::vec3(0.0f, 1.0f, 0.0f), -120.0f, -30.0f, 25.0f, 0.5f);
 
 	brickTexture = Texture("Textures/brick.png");
@@ -895,6 +895,17 @@ int main()
 	GLboolean animacionCanicaSimple2 = false;
 	GLboolean animacionCanicaSimple3 = false;
 	GLboolean animacionCanicaSimple4 = false;
+	/*
+	std::vector<std::string> skyboxFaces;
+		skyboxFaces.clear();
+		skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+		skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+		skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+		skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+		skyboxFaces.push_back("Textures/Skybox/paisaje.tga");
+		skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+		skybox = Skybox(skyboxFaces);
+	*/
 
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -949,29 +960,31 @@ int main()
 		if (ciclos >= 200) ciclos = 0;
 		else ciclos++;
 		//SkyBox
-		if (dia) {
-			std::vector<std::string> skyboxFaces;
-			skyboxFaces.clear();
-			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisaje.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage.tga");
-			skybox = Skybox(skyboxFaces);
-		}
-		else {
-			std::vector<std::string> skyboxFaces;
-			skyboxFaces.clear();
-			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisaje-noche.tga");
-			skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
-			skybox = Skybox(skyboxFaces);
+		
+		std::vector<std::string> skyboxFaces;
+			if (dia) {
+				skyboxFaces.clear();
+				skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisaje.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage.tga");
+				//skybox = Skybox(skyboxFaces);
+			}
+			else {
+				//std::vector<std::string> skyboxFaces;
+				skyboxFaces.clear();
+				skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisaje-noche.tga");
+				skyboxFaces.push_back("Textures/Skybox/paisage-noche.tga");
+				//skybox = Skybox(skyboxFaces);
 
-		}
+			}
+			skybox = Skybox(skyboxFaces);
 		
 
 		if (contadorCiclos >= 63.0) {
@@ -2075,38 +2088,14 @@ int main()
 			cambiaCienmiles = 0;
 		}
 
-
-	
+		//Modelo de adepto
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(5.0f + camera.getCameraPosition().x , -20.0f + camera.getCameraPosition().y, -80.0f + camera.getCameraPosition().z));
+		model = glm::rotate(model, -camera.getCameraYaw() + (toRadians * 90), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		bola_M.RenderModel();
 		
-
-		
-		
-		
-		
-
-	
-	
-		
-
-		
-		
-		
-
-		
-		
-		
-
-	
-		
-		
-		
-	
-
-		
-
-
-
-
 		glDisable(GL_BLEND);
 		glUseProgram(0);
 

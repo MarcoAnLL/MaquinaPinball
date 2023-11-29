@@ -89,6 +89,11 @@ void Camera::update()
 	up = glm::normalize(glm::cross(right, front));
 }
 
+float Camera::getCameraYaw()
+{
+	return glm::radians(yaw);
+}
+
 
 Camera::~Camera()
 {
