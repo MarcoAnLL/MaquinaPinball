@@ -1620,8 +1620,9 @@ int main()
 		///////////////////////////escudos
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-140.0f+movAvion_x, 230.0f + movAvion_y, -80.0f + movAvion_z));
+		model = glm::translate(model, glm::vec3(-162.0f+movAvion_x, 19.0f + movAvion_y, 42.0f + movAvion_z));
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(150.0f, 150.0f, 150.0f));
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1654,7 +1655,7 @@ int main()
 		model = glm::rotate(model, 13 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		//model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f+movAvion_x, 0.0f + movAvion_y, 0.0f + movAvion_z));
-		model = glm::scale(model, glm::vec3(40.0f, 550.0f, 13.0f));
+		model = glm::scale(model, glm::vec3(40.0f, 4550.0f, 13.0f));
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		
@@ -1664,10 +1665,10 @@ int main()
 		meshList[4]->RenderMesh();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-18.0f+movAvion_x, 89.0f+movAvion_y, 219.0+movAvion_z));
-		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, 45 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(40.0f, 550.0f, 13.0f));
+		model = glm::translate(model, glm::vec3(-70.0f, 43.0f, 186.0));
+		model = glm::rotate(model, 95 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		model = glm::rotate(model, 59 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f)); 
+		model = glm::scale(model, glm::vec3(40.0f, 570.0f, 13.0f));
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		
@@ -1677,8 +1678,10 @@ int main()
 		meshList[4]->RenderMesh();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(5.0f, 88.0f, 27.0));
+		model = glm::translate(model, glm::vec3(-90.0f, 71.0f, 42.0));
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 80 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, -10 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(40.0f, 50.0f, 10.0f));
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1688,29 +1691,7 @@ int main()
 		
 		meshList[4]->RenderMesh();
 
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-10.0f, 88.0f, 27.0));
-		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
-		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
-		flecha4.UseTexture();
-	
-		meshList[4]->RenderMesh();
-
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(17.0f, 88.0f, 23.0));
-		model = glm::rotate(model, 90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
-		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
-		flecha5.UseTexture();
-		
-		meshList[4]->RenderMesh();
 
 		//Segunda canica
 		model = glm::mat4(1.0);
